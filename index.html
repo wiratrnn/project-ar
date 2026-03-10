@@ -120,18 +120,25 @@
 
     function changeModel(assetId) {
       clearError();
+
+      // Mencegah proses berulang jika menekan tombol model yang sudah aktif
+      if (modelEntity.getAttribute('gltf-model') === assetId) {
+        setStatus('Model sudah aktif — arahkan kamera ke marker');
+        return;
+      }
+
       setStatus('Mengganti model…');
       fallback.setAttribute('visible', 'false');
 
-      let timeoutId;
+      // Ubah model langsung
+      modelEntity.setAttribute('gltf-model', assetId);
 
-      // 3. PERBAIKAN: Daftarkan listener SEBELUM mengubah atribut untuk mencegah race condition
-      const onLoaded = (evt) => {
-        clearTimeout(timeoutId);
+      // Karena file sudah di-preload di <a-assets>, pemuatannya instan dari cache.
+      // Kita beri jeda singkat untuk memastikan UI status terupdate dengan mulus.
+      setTimeout(() => {
         setStatus('Model siap — arahkan kamera ke marker');
-        fallback.setAttribute('visible', 'false');
-        modelEntity.removeEventListener('model-loaded', onLoaded);
-      };
+      }, 150); 
+    };
       
       modelEntity.addEventListener('model-loaded', onLoaded);
 
@@ -165,3 +172,4 @@
   </script>
 </body>
 </html>
+
