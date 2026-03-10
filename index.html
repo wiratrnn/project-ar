@@ -3,17 +3,15 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>WebAR - AR.js + A-Frame</title>
+  <title>WebAR - AR</title>
 
-  <!-- A-Frame dan AR.js -->
-  <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+  <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.js"></script>
 
   <style>
     html,body { height:100%; margin:0; }
     body { font-family:system-ui,Segoe UI,Roboto; overflow:hidden; }
 
-    /* UI tombol */
     .menu{
       position:fixed;
       bottom:20px;
@@ -36,7 +34,6 @@
       cursor:pointer;
     }
 
-    /* status overlay */
     #status {
       position:fixed;
       top:12px;
@@ -51,7 +48,6 @@
       pointer-events:none;
     }
 
-    /* pesan error */
     #error {
       position:fixed;
       top:60px;
@@ -79,18 +75,14 @@
     <button onclick="changeModel('#burger')">Burger</button>
   </div>
 
-  <!-- Scene AR -->
   <a-scene embedded arjs="sourceType: webcam; facingMode: environment; debugUIEnabled: false;">
-    <!-- Preload model supaya lebih andal -->
     <a-assets>
-      <a-asset-item id="ak47" src="AK47.glb"></a-asset-item>
-      <a-asset-item id="pizza" src="pizza.glb"></a-asset-item>
-      <a-asset-item id="burger" src="burger.glb"></a-asset-item>
+      <a-asset-item id="ak47" src="./AK47.glb"></a-asset-item>
+      <a-asset-item id="pizza" src="./pizza.glb"></a-asset-item>
+      <a-asset-item id="burger" src="./burger.glb"></a-asset-item>
     </a-assets>
 
-    <!-- marker -->
     <a-marker preset="hiro" id="marker">
-      <!-- entitas model (mulai dengan ak47) -->
       <a-entity id="model3d"
                 gltf-model="#ak47"
                 scale="0.2 0.2 0.2"
@@ -98,8 +90,6 @@
                 rotation="0 0 0"
                 animation="property: rotation; to: 0 360 0; loop: true; dur: 4000">
       </a-entity>
-
-      <!-- fallback sederhana: kotak merah (untuk testing) -->
       <a-box id="fallback" visible="false" position="0 0.25 0" depth="0.4" height="0.4" width="0.4" color="#FF5555"></a-box>
     </a-marker>
 
@@ -113,70 +103,64 @@
     const fallback = document.getElementById('fallback');
     const marker = document.getElementById('marker');
 
-    // tampilkan status dasar
     function setStatus(text) {
       statusEl.textContent = text;
     }
 
-    // tampilkan error ke user
     function setError(text) {
       errorEl.style.display = 'block';
       errorEl.textContent = text;
       console.error('AR error:', text);
     }
 
-    // sembunyikan error
     function clearError() {
       errorEl.style.display = 'none';
       errorEl.textContent = '';
     }
 
-    // ganti model (param: string id asset, mis. "#pizza")
     function changeModel(assetId) {
       clearError();
       setStatus('Mengganti model…');
-      modelEntity.setAttribute('gltf-model', assetId);
-
-      // reset fallback & visible agar menunggu event load
       fallback.setAttribute('visible', 'false');
 
-      // safety timeout: jika model tidak memicu model-loaded dalam 6 detik => tampilkan pesan
-      const t = setTimeout(() => {
-        setError('Gagal memuat model: kemungkinan file besar atau rusak. Coba model lain atau cek console.');
-        // tampilkan fallback agar terlihat sesuatu
-        fallback.setAttribute('visible', 'true');
-      }, 6000);
+      let timeoutId;
 
-      // jika model sukses dimuat, batalkan timeout dan update status
-      modelEntity.addEventListener('model-loaded', function onLoaded(evt) {
-        clearTimeout(t);
+      // 3. PERBAIKAN: Daftarkan listener SEBELUM mengubah atribut untuk mencegah race condition
+      const onLoaded = (evt) => {
+        clearTimeout(timeoutId);
         setStatus('Model siap — arahkan kamera ke marker');
         fallback.setAttribute('visible', 'false');
-        // hapus listener agar tidak menumpuk
         modelEntity.removeEventListener('model-loaded', onLoaded);
-      });
+      };
+      
+      modelEntity.addEventListener('model-loaded', onLoaded);
+
+      // Eksekusi perubahan model
+      modelEntity.setAttribute('gltf-model', assetId);
+
+      // 4. PERBAIKAN: Perpanjang durasi batas loading menjadi 15 detik (15000 ms)
+      timeoutId = setTimeout(() => {
+        setError('Gagal memuat model: koneksi lambat atau file terlampau besar. Cek console browser untuk detailnya.');
+        fallback.setAttribute('visible', 'true');
+        modelEntity.removeEventListener('model-loaded', onLoaded);
+      }, 15000);
     }
 
-    // attach global function agar tombol HTML bisa memanggil
     window.changeModel = changeModel;
 
-    // event marker detected / lost
     marker.addEventListener('markerFound', () => setStatus('Marker terdeteksi — menampilkan model'));
     marker.addEventListener('markerLost', () => setStatus('Marker tidak terlihat'));
 
-    // saat scene siap, cek apakah assets berhasil dimuat
     document.querySelector('a-scene').addEventListener('loaded', () => {
       setStatus('Scene siap, menunggu marker...');
-      // Jika asset gagal (cek tiap asset)
       const assets = document.querySelectorAll('a-asset-item');
       assets.forEach(a => {
         a.addEventListener('error', () => {
-          setError('Gagal memuat file: ' + a.getAttribute('src') + '. Pastikan file ada dan nama persis (case-sensitive).');
+          setError('Gagal memuat file: ' + a.getAttribute('src') + '. Pastikan file ada.');
         });
       });
     });
 
-    // inisialisasi: sembunyikan fallback (jika ada)
     fallback.setAttribute('visible', 'false');
   </script>
 </body>
