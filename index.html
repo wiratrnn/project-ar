@@ -1,32 +1,64 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8">
-  <title>AR.js + A-Frame Example</title>
-  <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-  <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+<meta charset="utf-8">
+<script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+<script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+<style>
+body{
+margin:0;
+overflow:hidden;
+}
+
+.menu{
+position:fixed;
+bottom:20px;
+left:50%;
+transform:translateX(-50%);
+z-index:10;
+}
+
+button{
+padding:10px 20px;
+margin:5px;
+font-size:16px;
+}
+</style>
+
 </head>
-<body style="margin:0; overflow:hidden;">
 
-  <a-scene embedded
-           vr-mode-ui="enabled: false"
-           renderer="logarithmicDepthBuffer: true;"
-           arjs="sourceType: webcam; debugUIEnabled: false; trackingMethod: best; cameraParametersUrl: https://raw.githack.com/AR-js-org/AR.js/master/data/data/camera_para.dat;">
+<body>
 
-    <!-- Marker preset (hiro) -->
-    <a-marker preset="hiro">
-      <!-- Model GLB -->
-      <a-entity gltf-model="url(model.glb)"
-                scale="0.5 0.5 0.5"
-                position="0 0 0"
-                rotation="0 180 0">
-      </a-entity>
-    </a-marker>
+<div class="menu">
+<button onclick="changeModel('AK47.glb')">AK47</button>
+<button onclick="changeModel('pizza.glb')">pizza</button>
+<button onclick="changeModel('burger.glb')">burger</button>
+</div>
 
-    <!-- Kamera A-Frame -->
-    <a-entity camera></a-entity>
-  </a-scene>
+<a-scene embedded arjs>
+
+<a-marker preset="hiro">
+
+<a-entity
+id="model3d"
+gltf-model="url(AK47.glb)"
+scale="0.5 0.5 0.5"
+position="0 0 0"
+animation="property: rotation; to: 0 360 0; loop: true; dur: 4000">
+</a-entity>
+
+</a-marker>
+
+<a-entity camera></a-entity>
+
+</a-scene>
+
+<script>
+function changeModel(modelFile){
+document.querySelector("#model3d")
+.setAttribute("gltf-model","url("+modelFile+")");
+}
+</script>
 
 </body>
 </html>
