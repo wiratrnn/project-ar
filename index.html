@@ -1,28 +1,183 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8">
-  <title>Projek AR</title>
-  <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-  <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-</head>
-<body style="margin:0; overflow:hidden;">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>WebAR - AR.js + A-Frame</title>
 
-  <a-scene embedded
-           vr-mode-ui="enabled: false"
-           renderer="logarithmicDepthBuffer: true;"
-           arjs="sourceType: webcam; debugUIEnabled: false; trackingMethod: best; cameraParametersUrl: https://raw.githack.com/AR-js-org/AR.js/master/data/data/camera_para.dat;">
-    <a-marker preset="hiro">
-      <a-entity gltf-model="url(pizza.glb)"
-                scale="0.5 0.5 0.5"
-                position="0 0 0"
-                rotation="0 180 0"
+  <!-- A-Frame dan AR.js -->
+  <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.js"></script>
+
+  <style>
+    html,body { height:100%; margin:0; }
+    body { font-family:system-ui,Segoe UI,Roboto; overflow:hidden; }
+
+    /* UI tombol */
+    .menu{
+      position:fixed;
+      bottom:20px;
+      left:50%;
+      transform:translateX(-50%);
+      z-index:20;
+      background: rgba(0,0,0,0.35);
+      padding:8px;
+      border-radius:8px;
+      display:flex;
+      gap:8px;
+    }
+    .menu button{
+      padding:8px 12px;
+      font-size:14px;
+      color:#fff;
+      background:rgba(255,255,255,0.08);
+      border:1px solid rgba(255,255,255,0.12);
+      border-radius:6px;
+      cursor:pointer;
+    }
+
+    /* status overlay */
+    #status {
+      position:fixed;
+      top:12px;
+      left:50%;
+      transform:translateX(-50%);
+      z-index:30;
+      background: rgba(0,0,0,0.6);
+      color:#fff;
+      padding:6px 10px;
+      border-radius:6px;
+      font-size:13px;
+      pointer-events:none;
+    }
+
+    /* pesan error */
+    #error {
+      position:fixed;
+      top:60px;
+      left:50%;
+      transform:translateX(-50%);
+      z-index:31;
+      background: rgba(178,34,34,0.9);
+      color:#fff;
+      padding:8px 12px;
+      border-radius:6px;
+      font-size:13px;
+      display:none;
+      max-width:90%;
+      text-align:center;
+    }
+  </style>
+</head>
+<body>
+  <div id="status">Menunggu marker...</div>
+  <div id="error"></div>
+
+  <div class="menu" role="toolbar" aria-label="Pilih model">
+    <button onclick="changeModel('#ak47')">AK47</button>
+    <button onclick="changeModel('#pizza')">Pizza</button>
+    <button onclick="changeModel('#burger')">Burger</button>
+  </div>
+
+  <!-- Scene AR -->
+  <a-scene embedded arjs="sourceType: webcam; facingMode: environment; debugUIEnabled: false;">
+    <!-- Preload model supaya lebih andal -->
+    <a-assets>
+      <a-asset-item id="ak47" src="AK47.glb"></a-asset-item>
+      <a-asset-item id="pizza" src="pizza.glb"></a-asset-item>
+      <a-asset-item id="burger" src="burger.glb"></a-asset-item>
+    </a-assets>
+
+    <!-- marker -->
+    <a-marker preset="hiro" id="marker">
+      <!-- entitas model (mulai dengan ak47) -->
+      <a-entity id="model3d"
+                gltf-model="#ak47"
+                scale="0.2 0.2 0.2"
+                position="0 0.4 0"
+                rotation="0 0 0"
                 animation="property: rotation; to: 0 360 0; loop: true; dur: 4000">
       </a-entity>
+
+      <!-- fallback sederhana: kotak merah (untuk testing) -->
+      <a-box id="fallback" visible="false" position="0 0.25 0" depth="0.4" height="0.4" width="0.4" color="#FF5555"></a-box>
     </a-marker>
+
     <a-entity camera></a-entity>
   </a-scene>
 
+  <script>
+    const statusEl = document.getElementById('status');
+    const errorEl = document.getElementById('error');
+    const modelEntity = document.getElementById('model3d');
+    const fallback = document.getElementById('fallback');
+    const marker = document.getElementById('marker');
+
+    // tampilkan status dasar
+    function setStatus(text) {
+      statusEl.textContent = text;
+    }
+
+    // tampilkan error ke user
+    function setError(text) {
+      errorEl.style.display = 'block';
+      errorEl.textContent = text;
+      console.error('AR error:', text);
+    }
+
+    // sembunyikan error
+    function clearError() {
+      errorEl.style.display = 'none';
+      errorEl.textContent = '';
+    }
+
+    // ganti model (param: string id asset, mis. "#pizza")
+    function changeModel(assetId) {
+      clearError();
+      setStatus('Mengganti model…');
+      modelEntity.setAttribute('gltf-model', assetId);
+
+      // reset fallback & visible agar menunggu event load
+      fallback.setAttribute('visible', 'false');
+
+      // safety timeout: jika model tidak memicu model-loaded dalam 6 detik => tampilkan pesan
+      const t = setTimeout(() => {
+        setError('Gagal memuat model: kemungkinan file besar atau rusak. Coba model lain atau cek console.');
+        // tampilkan fallback agar terlihat sesuatu
+        fallback.setAttribute('visible', 'true');
+      }, 6000);
+
+      // jika model sukses dimuat, batalkan timeout dan update status
+      modelEntity.addEventListener('model-loaded', function onLoaded(evt) {
+        clearTimeout(t);
+        setStatus('Model siap — arahkan kamera ke marker');
+        fallback.setAttribute('visible', 'false');
+        // hapus listener agar tidak menumpuk
+        modelEntity.removeEventListener('model-loaded', onLoaded);
+      });
+    }
+
+    // attach global function agar tombol HTML bisa memanggil
+    window.changeModel = changeModel;
+
+    // event marker detected / lost
+    marker.addEventListener('markerFound', () => setStatus('Marker terdeteksi — menampilkan model'));
+    marker.addEventListener('markerLost', () => setStatus('Marker tidak terlihat'));
+
+    // saat scene siap, cek apakah assets berhasil dimuat
+    document.querySelector('a-scene').addEventListener('loaded', () => {
+      setStatus('Scene siap, menunggu marker...');
+      // Jika asset gagal (cek tiap asset)
+      const assets = document.querySelectorAll('a-asset-item');
+      assets.forEach(a => {
+        a.addEventListener('error', () => {
+          setError('Gagal memuat file: ' + a.getAttribute('src') + '. Pastikan file ada dan nama persis (case-sensitive).');
+        });
+      });
+    });
+
+    // inisialisasi: sembunyikan fallback (jika ada)
+    fallback.setAttribute('visible', 'false');
+  </script>
 </body>
 </html>
