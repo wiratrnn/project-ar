@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>AR View</title>
+  <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+  <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+  <style>
+    body { margin: 0; overflow: hidden; }
+    
+    .btn-back {
+      position: absolute; top: 20px; left: 20px; z-index: 1000;
+      padding: 12px 20px; background-color: #2e5b43; color: #fff;
+      border: none; border-radius: 8px; font-weight: bold; cursor: pointer;
+    }
+    .btn-back:active { background-color: #214532; }
+
+    /* Wrapper untuk D-Pad dan Tombol Jump agar bersebelahan */
+    .ui-wrapper {
+      position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+      z-index: 1000; display: flex; align-items: flex-end; gap: 24px;
+    }
+
+    .controls {
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+    }
+    .ctrl-row { display: flex; gap: 8px; }
+    
+    .btn-dir {
+      width: 50px; height: 50px; background-color: #d9ed8b; color: #20231f;
+      border: none; border-radius: 8px; font-size: 20px; font-weight: bold;
+      cursor: pointer; display: grid; place-items: center;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    }
+    .btn-dir:active { transform: scale(0.9); }
+
+    /* Tombol Lompat */
+    .btn-jump {
+      width: 70px; height: 70px; background-color: #2e5b43; color: white;
+      border: 4px solid #d9ed8b; border-radius: 50%; font-size: 14px; font-weight: bold;
+      cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+      display: grid; place-items: center;
+    }
+    .btn-jump:active { transform: scale(0.9); background-color: #214532; }
+  </style>
+</head>
+<body>
+
+  <button class="btn-back" onclick="window.history.back()">Kembali</button>
+
+  <!-- Kontrol UI Bawah -->
+  <div class="ui-wrapper">
+    <div class="controls">
+      <button class="btn-dir" id="btn-up">▲</button>
+      <div class="ctrl-row">
+        <button class="btn-dir" id="btn-left">◀</button>
+        <button class="btn-dir" id="btn-down">▼</button>
+        <button class="btn-dir" id="btn-right">▶</button>
+      </div>
+    </div>
+    <!-- Tombol aksi lompat -->
+    <button class="btn-jump" id="btn-jump">JUMP</button>
+  </div>
+
+  <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;" vr-mode-ui="enabled: false">
+    <a-marker preset="hiro">
+      <a-entity id="model-makanan" position="0 0 0" rotation="0 0 0" 
+                animation__jump="property: position; to: 0 1.5 0; dur: 250; dir: alternate; loop: 2; easing: easeOutQuad; startEvents: do-jump">
+      </a-entity>
+    </a-marker>
+    <a-entity camera></a-entity>
+  </a-scene>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const menu = urlParams.get('menu') || 'sandwich';
+
+    const menuScales = {
+      'sandwich': '1 1 1',        
+      'donat': '1 1 1',           
+      'pancake': '1 1 1',   
+      'puding': '1 1 1'           
+    };
+
+    const modelEl = document.getElementById('model-makanan');
+    modelEl.setAttribute('gltf-model', `./assert/${menu}.glb`);
+    modelEl.setAttribute('scale', menuScales[menu] || '1 1 1');
+
+    // Rotasi Logic
+    let rotX = 0;
+    let rotY = 0;
+
+    function updateRotation() {
+      modelEl.setAttribute('animation', `property: rotation; to: ${rotX} ${rotY} 0; dur: 200; easing: linear`);
+    }
+
+    document.getElementById('btn-up').addEventListener('click', () => { rotX -= 30; updateRotation(); });
+    document.getElementById('btn-down').addEventListener('click', () => { rotX += 30; updateRotation(); });
+    document.getElementById('btn-left').addEventListener('click', () => { rotY -= 30; updateRotation(); });
+    document.getElementById('btn-right').addEventListener('click', () => { rotY += 30; updateRotation(); });
+
+    // Lompat Logic yang Diperbaiki
+    let isJumping = false;
+
+    document.getElementById('btn-jump').addEventListener('click', () => {
+      // Jika statusnya masih melompat, abaikan klik (mencegah bug spam klik)
+      if (isJumping) return; 
+      
+      isJumping = true;
+      modelEl.emit('do-jump');
+    });
+
+    // Mendengarkan event saat animasi lompatan selesai
+    modelEl.addEventListener('animationcomplete__jump', () => {
+      // Failsafe: Paksa kembalikan posisi ke titik 0 0 0 dengan aman
+      modelEl.setAttribute('position', '0 0 0');
+      // Buka kunci agar tombol bisa diklik lagi
+      isJumping = false; 
+    });
+  </script>
+
+</body>
+</html>
