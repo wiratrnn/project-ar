@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Menu AR</title>
 
   <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
@@ -16,68 +16,58 @@
       overflow: hidden;
     }
 
-    #back-button {
-      position: fixed;
-      top: 16px;
-      left: 16px;
-      z-index: 9999;
-      padding: 14px 22px;
-      font-size: 18px;
-      font-weight: 600;
-    }
-
     a-scene {
       position: fixed !important;
       inset: 0;
-      width: 100%;
-      height: 100%;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    #back-button {
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      z-index: 9999;
+      padding: 14px 22px;
+      font-size: 18px;
+      font-weight: bold;
     }
   </style>
 </head>
 
 <body>
-  <button id="back-button" type="button">Kembali</button>
+
+  <button id="back-button">Kembali</button>
+
+  <a-scene
+    vr-mode-ui="enabled: false"
+    arjs="sourceType: webcam; facingMode: environment; debugUIEnabled: false;">
+
+    <a-marker preset="hiro">
+      <a-entity
+        id="food-model"
+        position="0 0.12 0"
+        scale="0.2 0.2 0.2">
+      </a-entity>
+    </a-marker>
+
+    <a-entity camera></a-entity>
+
+  </a-scene>
 
   <script>
     const params = new URLSearchParams(window.location.search);
-    const menu = params.get('menu') === 'pizza' ? 'pizza' : 'burger';
+    const menu = params.get("menu") === "pizza" ? "pizza" : "burger";
 
-    const portrait = window.innerHeight >= window.innerWidth;
-    const sourceWidth = portrait ? 480 : 640;
-    const sourceHeight = portrait ? 640 : 480;
-
-    document.getElementById('back-button').addEventListener('click', () => {
-      window.location.href = `./index.html?menu=${menu}`;
-    });
-
-    const scene = document.createElement('a-scene');
-
-    scene.setAttribute('embedded', '');
-    scene.setAttribute('vr-mode-ui', 'enabled: false');
-
-    scene.setAttribute(
-      'arjs',
-      `sourceType: webcam; facingMode: environment; sourceWidth: ${sourceWidth}; sourceHeight: ${sourceHeight}; displayWidth: ${sourceWidth}; displayHeight: ${sourceHeight}; debugUIEnabled: false;`
+    document.getElementById("food-model").setAttribute(
+      "gltf-model",
+      "./" + menu + ".glb"
     );
 
-    const marker = document.createElement('a-marker');
-    marker.setAttribute('preset', 'hiro');
-
-    const model = document.createElement('a-entity');
-    model.setAttribute('gltf-model', `./${menu}.glb`);
-    model.setAttribute('position', '0 0.12 0');
-    model.setAttribute('rotation', '0 0 0');
-    model.setAttribute('scale', '0.2 0.2 0.2');
-
-    marker.appendChild(model);
-
-    const camera = document.createElement('a-entity');
-    camera.setAttribute('camera', '');
-
-    scene.appendChild(marker);
-    scene.appendChild(camera);
-
-    document.body.appendChild(scene);
+    document.getElementById("back-button").onclick = function () {
+      window.location.href = "./index.html?menu=" + menu;
+    };
   </script>
+
 </body>
 </html>
