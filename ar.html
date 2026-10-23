@@ -2,44 +2,82 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>AR Menu</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Menu AR</title>
 
   <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.js"></script>
+
+  <style>
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    #back-button {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      z-index: 9999;
+      padding: 14px 22px;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    a-scene {
+      position: fixed !important;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+  </style>
 </head>
+
 <body>
-
-  <button
-    onclick="history.back()"
-    style="position:fixed;top:10px;left:10px;z-index:9999;">
-    Kembali
-  </button>
-
-  <a-scene embedded arjs="sourceType: webcam; facingMode: environment; debugUIEnabled: false;">
-
-    <a-marker preset="hiro">
-      <a-entity
-        id="model"
-        position="0 0.12 0"
-        scale="0.2 0.2 0.2">
-      </a-entity>
-    </a-marker>
-
-    <a-entity camera></a-entity>
-
-  </a-scene>
+  <button id="back-button" type="button">Kembali</button>
 
   <script>
-    const params = new URLSearchParams(location.search);
-    const menu = params.get("menu") === "pizza" ? "pizza" : "burger";
+    const params = new URLSearchParams(window.location.search);
+    const menu = params.get('menu') === 'pizza' ? 'pizza' : 'burger';
 
-    document.getElementById("model").setAttribute(
-      "gltf-model",
-      `./${menu}.glb`
+    const portrait = window.innerHeight >= window.innerWidth;
+    const sourceWidth = portrait ? 480 : 640;
+    const sourceHeight = portrait ? 640 : 480;
+
+    document.getElementById('back-button').addEventListener('click', () => {
+      window.location.href = `./index.html?menu=${menu}`;
+    });
+
+    const scene = document.createElement('a-scene');
+
+    scene.setAttribute('embedded', '');
+    scene.setAttribute('vr-mode-ui', 'enabled: false');
+
+    scene.setAttribute(
+      'arjs',
+      `sourceType: webcam; facingMode: environment; sourceWidth: ${sourceWidth}; sourceHeight: ${sourceHeight}; displayWidth: ${sourceWidth}; displayHeight: ${sourceHeight}; debugUIEnabled: false;`
     );
-  </script>
 
+    const marker = document.createElement('a-marker');
+    marker.setAttribute('preset', 'hiro');
+
+    const model = document.createElement('a-entity');
+    model.setAttribute('gltf-model', `./${menu}.glb`);
+    model.setAttribute('position', '0 0.12 0');
+    model.setAttribute('rotation', '0 0 0');
+    model.setAttribute('scale', '0.2 0.2 0.2');
+
+    marker.appendChild(model);
+
+    const camera = document.createElement('a-entity');
+    camera.setAttribute('camera', '');
+
+    scene.appendChild(marker);
+    scene.appendChild(camera);
+
+    document.body.appendChild(scene);
+  </script>
 </body>
 </html>
