@@ -1,151 +1,45 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#173626" />
-  <title>Tampilkan AR — Bite & Beyond</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>AR Menu</title>
 
   <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.js"></script>
-
-  <style>
-    :root { --green: #234b36; --paper: #f7f4ed; --ink: #20231f; }
-    * { box-sizing: border-box; }
-    html, body { height: 100%; width: 100%; margin: 0; overflow: hidden; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #101512; }
-    .hud { position: fixed; z-index: 20; left: 0; right: 0; pointer-events: none; padding: calc(14px + env(safe-area-inset-top)) 14px 0; display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
-    .hud-card { pointer-events: auto; border: 1px solid rgba(255,255,255,.14); background: rgba(18,28,22,.78); color: white; border-radius: 15px; padding: 11px 14px; backdrop-filter: blur(10px); box-shadow: 0 7px 22px rgba(0,0,0,.16); }
-    .title { font-weight: 850; font-size: 14px; letter-spacing: -.02em; }
-    .subtitle { margin-top: 4px; color: rgba(255,255,255,.72); font-size: 11px; line-height: 1.4; }
-    .back { display: inline-flex; align-items: center; gap: 7px; color: white; text-decoration: none; font-size: 12px; font-weight: 800; white-space: nowrap; }
-    .status-wrap { position: fixed; z-index: 22; top: calc(92px + env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); width: min(92vw, 390px); pointer-events: none; text-align: center; }
-    #status { display: inline-block; padding: 9px 13px; border: 1px solid rgba(255,255,255,.12); border-radius: 999px; background: rgba(18,28,22,.78); color: #fff; font-size: 12px; line-height: 1.35; backdrop-filter: blur(10px); }
-    #error { display: none; margin-top: 8px; border-radius: 12px; background: rgba(130,35,31,.94); color: white; padding: 10px 12px; font-size: 12px; line-height: 1.5; }
-    .bottom-hint { position: fixed; z-index: 20; left: 14px; right: 14px; bottom: calc(16px + env(safe-area-inset-bottom)); display: flex; justify-content: center; pointer-events: none; }
-    .hint-inner { max-width: 440px; width: 100%; padding: 12px 15px; border-radius: 16px; color: white; background: rgba(18,28,22,.78); border: 1px solid rgba(255,255,255,.13); font-size: 12px; line-height: 1.45; text-align: center; backdrop-filter: blur(10px); }
-    .hint-inner strong { color: #d9ed8b; }
-    .camera-note { display: block; margin-top: 3px; font-size: 10px; color: rgba(255,255,255,.65); }
-    a-scene { position: fixed !important; inset: 0 !important; width: 100% !important; height: 100% !important; }
-    a-scene canvas { width: 100% !important; height: 100% !important; }
-    @media (max-width: 420px) { .hud-card { padding: 10px 11px; } .title { font-size: 13px; } .subtitle { font-size: 10px; } .back { font-size: 11px; } }
-  </style>
 </head>
 <body>
-  <header class="hud">
-    <div class="hud-card">
-      <div class="title" id="menu-title">Menu AR</div>
-      <div class="subtitle">Bite & Beyond · Marker Hiro</div>
-    </div>
-    <a class="hud-card back" id="back-link" href="./index.html">← Kembali ke menu</a>
-  </header>
 
-  <div class="status-wrap" aria-live="polite">
-    <div id="status">Menyiapkan kamera AR…</div>
-    <div id="error"></div>
-  </div>
+  <button
+    onclick="history.back()"
+    style="position:fixed;top:10px;left:10px;z-index:9999;">
+    Kembali
+  </button>
 
-  <div class="bottom-hint">
-    <div class="hint-inner">
-      <strong>Arahkan kamera ke marker Hiro</strong><br />Pastikan seluruh pola marker terlihat dan mendapat pencahayaan cukup.
-      <span class="camera-note">Jika browser meminta izin kamera, pilih Izinkan.</span>
-    </div>
-  </div>
+  <a-scene embedded arjs="sourceType: webcam; facingMode: environment; debugUIEnabled: false;">
 
-  <a-scene
-    embedded
-    vr-mode-ui="enabled: false"
-    renderer="logarithmicDepthBuffer: true; colorManagement: true;"
-    arjs="sourceType: webcam; facingMode: environment; debugUIEnabled: false;">
-
-    <a-assets timeout="20000">
-      <a-asset-item id="burger-asset" src="./burger.glb"></a-asset-item>
-      <a-asset-item id="pizza-asset" src="./pizza.glb"></a-asset-item>
-    </a-assets>
-
-    <a-marker preset="hiro" id="hiro-marker" emitevents="true">
+    <a-marker preset="hiro">
       <a-entity
-        id="food-model"
+        id="model"
         position="0 0.12 0"
-        rotation="0 0 0"
         scale="0.2 0.2 0.2">
       </a-entity>
     </a-marker>
 
     <a-entity camera></a-entity>
+
   </a-scene>
 
   <script>
-    (() => {
-      const menus = {
-        burger: { name: 'Burger', asset: '#burger-asset', scale: '0.2 0.2 0.2', position: '0 0.12 0' },
-        pizza:  { name: 'Pizza',  asset: '#pizza-asset',  scale: '0.2 0.2 0.2', position: '0 0.12 0' }
-      };
-      const params = new URLSearchParams(window.location.search);
-      const requestedMenu = params.get('menu');
-      const menuKey = Object.prototype.hasOwnProperty.call(menus, requestedMenu) ? requestedMenu : 'burger';
-      const menu = menus[menuKey];
-      const titleEl = document.getElementById('menu-title');
-      const statusEl = document.getElementById('status');
-      const errorEl = document.getElementById('error');
-      const modelEl = document.getElementById('food-model');
-      const markerEl = document.getElementById('hiro-marker');
-      const sceneEl = document.querySelector('a-scene');
-      let markerVisible = false;
-      let modelLoaded = false;
-      let loadTimer = null;
+    const params = new URLSearchParams(location.search);
+    const menu = params.get("menu") === "pizza" ? "pizza" : "burger";
 
-      titleEl.textContent = `${menu.name} · AR`;
-      document.title = `${menu.name} AR — Bite & Beyond`;
-      document.getElementById('back-link').href = `./index.html?menu=${menuKey}`;
-
-      function setStatus(message) { statusEl.textContent = message; }
-      function showError(message) {
-        errorEl.textContent = message;
-        errorEl.style.display = 'block';
-        console.error('[WebAR]', message);
-      }
-
-      modelEl.addEventListener('model-loaded', () => {
-        modelLoaded = true;
-        if (loadTimer) clearTimeout(loadTimer);
-        setStatus(markerVisible ? 'Marker terdeteksi — model siap!' : 'Model siap — arahkan kamera ke marker Hiro.');
-      });
-
-      modelEl.addEventListener('model-error', (event) => {
-        if (loadTimer) clearTimeout(loadTimer);
-        showError(`Model ${menu.name} gagal dimuat. Pastikan file ${menuKey}.glb ada di folder yang sama dengan index.html dan ar.html.`);
-        setStatus('Model gagal dimuat.');
-        console.error('Detail model-error:', event.detail);
-      });
-
-      markerEl.addEventListener('markerFound', () => {
-        markerVisible = true;
-        setStatus(modelLoaded ? 'Marker terdeteksi — model siap!' : `Marker terdeteksi — memuat ${menu.name}…`);
-      });
-
-      markerEl.addEventListener('markerLost', () => {
-        markerVisible = false;
-        if (modelLoaded) setStatus('Marker tidak terlihat — arahkan kamera kembali ke Hiro.');
-      });
-
-      sceneEl.addEventListener('loaded', () => {
-        modelEl.setAttribute('position', menu.position);
-        modelEl.setAttribute('scale', menu.scale);
-        modelEl.setAttribute('gltf-model', menu.asset);
-        setStatus(`Memuat ${menu.name}… izinkan kamera dan arahkan ke marker Hiro.`);
-        loadTimer = setTimeout(() => {
-          if (!modelLoaded) {
-            showError(`Model belum selesai dimuat. Periksa koneksi dan pastikan file ${menuKey}.glb tersedia di GitHub Pages.`);
-          }
-        }, 20000);
-      });
-
-      document.querySelectorAll('a-asset-item').forEach((asset) => {
-        asset.addEventListener('error', () => {
-          showError(`Tidak dapat memuat ${asset.getAttribute('src')}. Pastikan file model tersedia di root repository.`);
-        });
-      });
-    })();
+    document.getElementById("model").setAttribute(
+      "gltf-model",
+      `./${menu}.glb`
+    );
   </script>
+
 </body>
 </html>
