@@ -29,31 +29,16 @@
     .topbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 44px; }
     .brand { display: flex; align-items: center; gap: 11px; font-weight: 850; letter-spacing: -.04em; font-size: 20px; }
     .brand-mark { width: 40px; height: 40px; display: grid; place-items: center; background: var(--lime); border-radius: 14px; font-size: 22px; }
-    .top-pill { border: 1px solid var(--line); background: rgba(255,255,255,.6); border-radius: 999px; padding: 9px 13px; color: var(--green); font-size: 12px; font-weight: 800; letter-spacing: .09em; }
-    .hero { display: grid; grid-template-columns: 1.2fr .8fr; gap: 32px; align-items: center; margin-bottom: 34px; }
-    .eyebrow { display: inline-flex; align-items: center; gap: 8px; text-transform: uppercase; color: var(--green); letter-spacing: .12em; font-weight: 850; font-size: 11px; margin-bottom: 14px; }
-    .eyebrow::before { content: ""; width: 22px; height: 2px; background: var(--green); }
-    h1 { font-size: clamp(38px, 6vw, 66px); line-height: .98; letter-spacing: -.065em; margin: 0 0 18px; max-width: 640px; }
-    h1 span { color: var(--green); }
-    .hero-copy { color: var(--muted); line-height: 1.7; max-width: 520px; margin: 0; font-size: 15px; }
-    .hero-art { min-height: 220px; border-radius: 28px; background: var(--green); color: white; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; box-shadow: var(--shadow); }
-    .hero-art::before, .hero-art::after { content: ""; position: absolute; border: 1px solid rgba(255,255,255,.22); border-radius: 50%; width: 220px; height: 220px; }
-    .hero-art::after { width: 300px; height: 300px; }
-    .hero-emoji { font-size: 112px; z-index: 1; filter: drop-shadow(0 14px 10px rgba(0,0,0,.18)); transform: rotate(-8deg); }
-    .spark { position: absolute; z-index: 2; font-size: 24px; }
-    .spark.one { top: 28px; right: 28px; }
-    .spark.two { bottom: 25px; left: 26px; font-size: 30px; }
-    .menu-head { display: flex; justify-content: space-between; align-items: end; gap: 18px; margin: 40px 0 18px; }
+    .menu-head { margin: 0 0 18px; }
     h2 { margin: 0; letter-spacing: -.045em; font-size: clamp(25px, 3vw, 34px); }
-    .menu-sub { color: var(--muted); margin: 7px 0 0; font-size: 14px; }
-    .count { font-size: 12px; font-weight: 750; color: var(--muted); white-space: nowrap; }
     .grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 18px; }
     .product {
       position: relative; display: flex; flex-direction: column; min-width: 0; overflow: hidden;
       background: var(--card); border: 1.5px solid var(--line); border-radius: 24px; padding: 13px;
       text-align: left; cursor: pointer; color: inherit; transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+      -webkit-tap-highlight-color: transparent; /* Menghilangkan highlight biru saat disentuh di HP */
     }
-    .product:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+    .product:active { transform: scale(0.98); } /* Efek visual saat ditekan di HP */
     .product.selected { border-color: var(--green); box-shadow: 0 0 0 3px rgba(46,91,67,.10), var(--shadow); }
     .visual { height: 215px; border-radius: 17px; display: grid; place-items: center; position: relative; overflow: hidden; }
     .visual::before { content: ""; position: absolute; width: 210px; height: 210px; border: 1px solid rgba(36,43,33,.09); border-radius: 50%; }
@@ -74,37 +59,27 @@
     .summary-label { color: var(--muted); font-size: 11px; margin-bottom: 4px; }
     .summary-name { font-weight: 850; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .ar-button { border: 0; border-radius: 15px; background: var(--green); color: white; padding: 15px 22px; display: inline-flex; align-items: center; justify-content: center; gap: 11px; cursor: pointer; font-weight: 850; box-shadow: 0 8px 18px rgba(46,91,67,.18); transition: background .18s ease, transform .18s ease; min-width: 190px; }
-    .ar-button:hover { background: var(--green-dark); transform: translateY(-1px); }
-    .ar-button:focus-visible, .product:focus-visible { outline: 3px solid #8dab50; outline-offset: 3px; }
+    .ar-button:active { transform: scale(0.96); } /* Efek visual saat tombol ditekan di HP */
     .ar-button svg { width: 19px; height: 19px; }
-    .footnote { margin-top: 22px; color: var(--muted); font-size: 12px; line-height: 1.6; }
     @media (max-width: 680px) {
       .shell { padding: 17px 14px 116px; }
       .topbar { margin-bottom: 27px; }
       .brand { font-size: 17px; }
       .brand-mark { width: 36px; height: 36px; }
-      .top-pill { font-size: 10px; padding: 8px 10px; }
-      .hero { grid-template-columns: 1fr; gap: 20px; }
-      h1 { max-width: 480px; }
-      .hero-art { min-height: 150px; border-radius: 22px; }
-      .hero-emoji { font-size: 85px; }
-      .hero-art::before { width: 165px; height: 165px; }
-      .hero-art::after { width: 230px; height: 230px; }
-      .menu-head { margin-top: 30px; }
-      .grid { gap: 10px; }
-      .product { padding: 8px; border-radius: 18px; }
-      .visual { height: 145px; border-radius: 13px; }
+      .grid { grid-template-columns: 1fr; gap: 14px; } /* Diubah menjadi 1 kolom agar kartu lebih besar dan mudah diklik di HP */
+      .product { padding: 12px; border-radius: 18px; }
+      .visual { height: 160px; border-radius: 13px; }
       .visual::before { width: 150px; height: 150px; }
       .visual::after { width: 112px; height: 112px; }
       .food-emoji { font-size: 72px; }
       .tag { top: 8px; left: 8px; font-size: 8px; padding: 6px 7px; }
-      .selected-mark { top: 8px; right: 8px; height: 23px; width: 23px; }
+      .selected-mark { top: 12px; right: 12px; height: 25px; width: 25px; }
       .product-info { padding: 12px 3px 6px; }
-      .product h3 { font-size: 17px; }
-      .product p { font-size: 11px; }
-      .select-hint { font-size: 10px; }
+      .product h3 { font-size: 18px; }
+      .product p { font-size: 13px; }
+      .select-hint { font-size: 11px; }
       .dock-inner { gap: 12px; }
-      .ar-button { min-width: auto; padding: 14px 15px; border-radius: 13px; font-size: 13px; }
+      .ar-button { min-width: auto; padding: 14px 15px; border-radius: 13px; font-size: 14px; flex-grow: 1; }
       .summary-name { max-width: 135px; }
     }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; } }
@@ -114,27 +89,11 @@
   <main class="shell">
     <header class="topbar">
       <div class="brand"><span class="brand-mark">✳</span><span>Bite & Beyond</span></div>
-      <div class="top-pill">MENU EXPERIENCE · AR</div>
     </header>
-
-    <section class="hero" aria-labelledby="hero-title">
-      <div>
-        <div class="eyebrow">Pilih · Pindai · Lihat</div>
-        <h1 id="hero-title">Menu favoritmu,<br><span>jadi 3D.</span></h1>
-        <p class="hero-copy">Pilih makanan, lalu lihat model 3D-nya langsung melalui kamera ponsel. Tidak perlu memasang aplikasi tambahan.</p>
-      </div>
-      <div class="hero-art" aria-hidden="true">
-        <span class="spark one">✦</span><span class="spark two">✧</span><span class="hero-emoji">🍔</span>
-      </div>
-    </section>
 
     <section aria-labelledby="menu-title">
       <div class="menu-head">
-        <div>
-          <h2 id="menu-title">Pilih menu</h2>
-          <p class="menu-sub">Pilih salah satu makanan untuk melihat versi AR.</p>
-        </div>
-        <div class="count">2 MENU TERSEDIA</div>
+        <h2 id="menu-title">Pilih menu</h2>
       </div>
 
       <div class="grid" role="radiogroup" aria-label="Pilihan menu">
@@ -162,7 +121,6 @@
           </div>
         </button>
       </div>
-      <p class="footnote">Catatan: model AR yang tersedia saat ini adalah burger dan pizza. Tampilan emoji pada kartu hanya ilustrasi menu; model 3D yang tampil di kamera dimuat dari file GLB.</p>
     </section>
   </main>
 
@@ -180,7 +138,7 @@
   </div>
 
   <script>
-    const productCards = [...document.querySelectorAll('.product')];
+    const productCards = document.querySelectorAll('.product');
     const selectedName = document.getElementById('selected-name');
     const showARButton = document.getElementById('show-ar');
     const menuNames = { burger: 'Burger', pizza: 'Pizza' };
@@ -197,19 +155,11 @@
         card.setAttribute('aria-checked', String(active));
       });
       selectedName.textContent = menuNames[selectedMenu];
-      document.querySelector('.hero-emoji').textContent = selectedMenu === 'burger' ? '🍔' : '🍕';
     }
 
+    // Hanya menggunakan event click (tap) untuk perangkat seluler
     productCards.forEach((card) => {
       card.addEventListener('click', () => selectMenu(card.dataset.menu));
-      card.addEventListener('keydown', (event) => {
-        if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
-          event.preventDefault();
-          const nextMenu = selectedMenu === 'burger' ? 'pizza' : 'burger';
-          selectMenu(nextMenu);
-          document.querySelector(`[data-menu="${nextMenu}"]`).focus();
-        }
-      });
     });
 
     showARButton.addEventListener('click', () => {
